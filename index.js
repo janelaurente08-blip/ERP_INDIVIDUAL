@@ -1,0 +1,169 @@
+/*
+    MIT License
+
+    Copyright (c) 2025 Christian I. Cabrera || XianFire Framework
+    Mindoro State University - Philippines
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+    */
+
+    import express from "express";
+    import path from "path";
+    import session from "express-session";
+    import flash from "connect-flash";
+    import router from "./routes/index.js";
+    import fs from "fs";
+    import hbs from "hbs";
+    import { fileURLToPath, pathToFileURL } from "url";
+    import { dirname } from "path";
+    import sequelize from "./config/database.js";
+import Worker from "./models/Worker.js";
+
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+
+    const app = express();
+
+    // Use port 3001 to avoid the existing port 3000 conflict.
+    const PORT = process.env.PORT || 3001;
+
+    // Middleware
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+
+    app.use(express.static(path.join(__dirname, "public")));
+
+    // Session configuration
+    app.use(
+      session({
+        secret: process.env.SESSION_SECRET || "xianfire-secret-key",
+        resave: false,
+        saveUninitialized: false,
+      })
+    );
+
+    app.use(flash());
+
+    // XianFire template engine
+    app.engine("xian", async (filePath, options, callback) => {
+      try {
+        const originalPartialsDir = hbs.partialsDir;
+
+        hbs.partialsDir = path.join(__dirname, "views");
+
+        const result = await new Promise((resolve, reject) => {
+          hbs.__express(filePath, options, (err, html) => {
+            if (err) {
+              return reject(err);
+            }
+
+            resolve(html);
+          });
+        });
+
+        hbs.partialsDir = originalPartialsDir;
+
+        callback(null, result);
+      } catch (err) {
+        callback(err);
+      }
+    });
+
+    // Flash messages
+    app.use((req, res, next) => {
+      res.locals.success_msg = req.flash("success_msg");
+      res.locals.error_msg = req.flash("error_msg");
+
+      next();
+    });
+
+    // View configuration
+    app.set("views", path.join(__dirname, "views"));
+    app.set("view engine", "xian");
+
+    // Register XianFire partials
+    const partialsDir = path.join(__dirname, "views", "partials");
+
+    if (fs.existsSync(partialsDir)) {
+      fs.readdir(partialsDir, (err, files) => {
+        if (err) {
+          console.error("Could not read partials directory:", err);
+          return;
+        }
+
+        files
+          .filter((file) => file.endsWith(".xian"))
+          .forEach((file) => {
+            const partialName = file.replace(".xian", "");
+            const fullPath = path.join(partialsDir, file);
+
+            fs.readFile(fullPath, "utf8", (err, content) => {
+              if (err) {
+                console.error(`Failed to read partial: ${file}`, err);
+                return;
+              }
+
+              hbs.registerPartial(partialName, content);
+            });
+          });
+      });
+    }
+
+    // Routes
+    app.use("/", router);
+
+    // Export app for other modules
+    export default app;
+
+    // Start server
+    // Start server
+  export const startServer = async (port = PORT) => {
+    await sequelize.sync();
+
+    return new Promise((resolve, reject) => {
+      const server = app.listen(port, () => {
+        console.log(
+          `🔥 XianFire server is running on http://localhost:${port}`
+        );
+
+        resolve(server);
+      });
+
+      server.on("error", reject);
+    });
+  };
+
+    // Automatically start only when executed directly.
+    const isDirectRun =
+      process.argv[1] &&
+      import.meta.url === pathToFileURL(process.argv[1]).href;
+
+    if (isDirectRun && !process.env.XIAN_ELECTRON) {
+      startServer().catch((error) => {
+        if (error.code === "EADDRINUSE") {
+          console.error(
+            `Port ${PORT} is already in use. Stop the other server or change PORT.`
+          );
+        } else {
+          console.error("Failed to start XianFire:", error);
+        }
+
+        process.exitCode = 1;
+      });
+    }
