@@ -1,12 +1,828 @@
-{{> head}}
-<body class="bg-gray-50">
-  <div class="flex justify-center mt-10">
-    <form class="flex flex-col w-96 p-6 border rounded-lg shadow" method="POST" action="/login">
-      <h2 class="text-xl font-bold mb-4 text-center">Login</h2>
-      <input type="email" name="email" placeholder="Email" class="mb-2 p-2 border rounded" required />
-      <input type="password" name="password" placeholder="Password" class="mb-2 p-2 border rounded" required />
-      <button type="submit" class="bg-blue-500 text-white p-2 rounded">Login</button>
-      <a href="/register" class="text-blue-700 mt-2 text-center">Don't have an account? Register</a>
-    </form>
-  </div>
-{{> footer }}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Login | BUILDORA</title>
+
+  <style>
+    :root {
+      --dark: #26333d;
+      --darker: #1c252c;
+      --yellow: #f2b705;
+      --bg: #f6f5f2;
+      --text: #1c252c;
+      --muted: #68737c;
+      --border: #d5d2cb;
+      --danger: #b3341f;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .login-layout {
+      display: grid;
+      grid-template-columns: 48% 52%;
+      min-height: 100vh;
+    }
+
+    /* LEFT PANEL */
+
+    .brand-panel {
+      position: relative;
+      min-height: 100vh;
+      overflow: hidden;
+      padding: 56px 65px;
+      background: linear-gradient(
+        145deg,
+        #2c3c47,
+        #1c252c
+      );
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .brand-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(
+        circle at 20% 65%,
+        rgba(255, 255, 255, 0.08),
+        transparent 55%
+      );
+    }
+
+    .brand-content,
+    .brand-footer {
+      position: relative;
+      z-index: 2;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .brand-icon {
+      display: block;
+      flex-shrink: 0;
+      width: 47px;
+      height: 52px;
+      background: repeating-linear-gradient(
+        135deg,
+        var(--yellow) 0 11px,
+        transparent 11px 19px
+      );
+    }
+
+    .brand-title {
+      font-size: 43px;
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
+
+    .brand-description {
+      margin-top: 5px;
+      font-size: 15px;
+      color: #c4cdd3;
+    }
+
+    .accent-line {
+      width: 95px;
+      height: 5px;
+      margin: 45px 0 38px;
+      border-radius: 4px;
+      background: var(--yellow);
+    }
+
+    .headline {
+      max-width: 550px;
+      font-size: clamp(32px, 3.1vw, 50px);
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -1px;
+    }
+
+    .headline span {
+      color: var(--yellow);
+    }
+
+    .description {
+      max-width: 460px;
+      margin-top: 25px;
+      color: #c4cdd3;
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .construction-art {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-height: 245px;
+      margin-top: 45px;
+      opacity: 0.92;
+    }
+
+    .brand-footer {
+      font-size: 12px;
+      color: #aab6bf;
+      margin-top: 15px;
+    }
+
+    /* RIGHT PANEL */
+
+    .form-panel {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 55px 35px;
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    .form-panel::before {
+      content: "";
+      position: absolute;
+      top: -25px;
+      right: 55px;
+      width: 88px;
+      height: 155px;
+      background: var(--yellow);
+      transform: skew(-35deg);
+      opacity: 0.8;
+    }
+
+    .login-card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 490px;
+      padding: 45px 42px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.035);
+    }
+
+    .login-heading {
+      text-align: center;
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.7px;
+    }
+
+    .login-subtitle {
+      margin-top: 11px;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .small-accent {
+      width: 70px;
+      height: 4px;
+      margin: 22px auto 34px;
+      background: var(--yellow);
+      border-radius: 4px;
+    }
+
+    .field {
+      margin-bottom: 23px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 9px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      top: 50%;
+      left: 15px;
+      width: 20px;
+      height: 20px;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .input-control {
+      width: 100%;
+      height: 51px;
+      padding: 0 50px 0 48px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      outline: none;
+      background: #fbfaf8;
+      color: var(--text);
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .input-control:focus {
+      border-color: var(--yellow);
+      box-shadow: 0 0 0 3px rgba(242, 183, 5, .14);
+    }
+
+    .show-password {
+      position: absolute;
+      right: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 8px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .remember-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 28px;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .remember-row input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--yellow);
+      cursor: pointer;
+    }
+
+    .login-button {
+      width: 100%;
+      height: 53px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--yellow);
+      color: #1c252c;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .login-button:hover:not(:disabled) {
+      background: #dda800;
+    }
+
+    .login-button:disabled {
+      opacity: .7;
+      cursor: wait;
+    }
+
+    .login-error {
+      display: none;
+      margin-bottom: 20px;
+      padding: 13px 15px;
+      border: 1px solid #f3b4a8;
+      border-left: 4px solid var(--danger);
+      border-radius: 4px;
+      background: #fff2f0;
+      color: var(--danger);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .login-error.visible {
+      display: block;
+    }
+
+    .login-note {
+      margin-top: 27px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 900px) {
+      .login-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-panel {
+        min-height: auto;
+        padding: 30px 25px;
+      }
+
+      .brand-title {
+        font-size: 30px;
+      }
+
+      .brand-icon {
+        width: 34px;
+        height: 38px;
+      }
+
+      .headline,
+      .description,
+      .accent-line,
+      .construction-art,
+      .brand-footer {
+        display: none;
+      }
+
+      .form-panel {
+        min-height: calc(100vh - 110px);
+        padding: 35px 18px;
+      }
+
+      .login-card {
+        padding: 35px 25px;
+      }
+    }
+
+    @media (max-width: 450px) {
+      .login-heading {
+        font-size: 25px;
+      }
+
+      .login-card {
+        padding: 28px 20px;
+      }
+
+      .brand-description {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="login-layout">
+
+  <!-- LEFT BRAND PANEL -->
+
+  <section class="brand-panel">
+
+    <div class="brand-content">
+
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true"></span>
+
+        <div>
+          <div class="brand-title">BUILDORA</div>
+          <p class="brand-description">
+            Labor Productivity Management
+          </p>
+        </div>
+      </div>
+
+      <div class="accent-line"></div>
+
+      <h1 class="headline">
+        Track Labor.<br>
+        Measure Productivity.<br>
+        <span>Improve Performance.</span>
+      </h1>
+
+      <p class="description">
+        A unified workspace for managing productivity
+        targets, tracking worker accomplishments,
+        monitoring project performance, and
+        evaluating labor efficiency.
+      </p>
+
+    </div>
+
+    <!-- DECORATIVE CONSTRUCTION ILLUSTRATION -->
+
+    <svg
+      class="construction-art"
+      viewBox="0 0 600 240"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      aria-hidden="true"
+    >
+
+      <g stroke="#9eaeb8" stroke-width="3" opacity=".35">
+        <path d="M30 210V125H180V210"/>
+        <path d="M210 210V75H390V210"/>
+        <path d="M410 210V110H575V210"/>
+
+        <path d="M210 115H390M210 160H390"/>
+        <path d="M255 75V210M335 75V210"/>
+        <path d="M455 110V210M520 110V210"/>
+
+        <path d="M365 75V15"/>
+        <path d="M365 15L540 40H180L365 15"/>
+        <path d="M420 25V105"/>
+        <rect x="410" y="105" width="20" height="12"/>
+      </g>
+
+      <g fill="#11191f">
+        <circle cx="110" cy="158" r="18"/>
+        <path d="M80 210V188Q80 170 110 170Q140 170 140 188V210Z"/>
+
+        <circle cx="215" cy="150" r="18"/>
+        <path d="M180 210V182Q180 164 215 164Q250 164 250 182V210Z"/>
+
+        <circle cx="325" cy="168" r="16"/>
+        <path d="M295 210V190Q295 178 325 178Q355 178 355 190V210Z"/>
+      </g>
+
+      <g stroke="#f2b705" stroke-width="8">
+        <path d="M90 177L105 210"/>
+        <path d="M128 177L115 210"/>
+
+        <path d="M197 170L209 210"/>
+        <path d="M234 170L222 210"/>
+
+        <path d="M312 183L324 210"/>
+        <path d="M341 183L332 210"/>
+      </g>
+
+      <path d="M0 230L600 185" stroke="#f2b705" stroke-width="7"/>
+
+    </svg>
+
+    <p class="brand-footer">
+      © BUILDORA — Labor Productivity Management
+    </p>
+
+  </section>
+
+  <!-- RIGHT LOGIN PANEL -->
+
+  <section class="form-panel">
+
+    <div class="login-card">
+
+      <h2 class="login-heading">
+        Welcome Back
+      </h2>
+
+      <p class="login-subtitle">
+        Sign in to your BUILDORA account
+      </p>
+
+      <div class="small-accent"></div>
+
+      <!-- LOGIN ERROR -->
+
+      <div
+        id="loginError"
+        class="login-error"
+        role="alert"
+        aria-live="polite"
+      ></div>
+
+      <!-- LOGIN FORM -->
+
+      <form
+        id="loginForm"
+        action="/login"
+        method="POST"
+        autocomplete="on"
+      >
+
+        <!-- EMAIL -->
+
+        <div class="field">
+          <label for="email">
+            Email Address
+          </label>
+
+          <div class="input-wrap">
+
+            <svg class="input-icon" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor"
+              stroke-width="1.8">
+              <rect x="3" y="5" width="18"
+                height="14" rx="2"/>
+              <path d="m3 7 9 6 9-6"/>
+            </svg>
+
+            <input
+              class="input-control"
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Enter your email"
+              autocomplete="username"
+              list="accountSuggestions"
+              required
+            >
+
+            <datalist id="accountSuggestions">
+              <option value="productivity@buildora.local"></option>
+              <option value="supervisor@buildora.local"></option>
+              <option value="worker@buildora.local"></option>
+            </datalist>
+
+          </div>
+        </div>
+
+        <!-- PASSWORD -->
+
+        <div class="field">
+
+          <label for="password">
+            Password
+          </label>
+
+          <div class="input-wrap">
+
+            <svg class="input-icon" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor"
+              stroke-width="1.8">
+              <rect x="5" y="10" width="14"
+                height="11" rx="2"/>
+              <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+            </svg>
+
+            <input
+              class="input-control"
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            >
+
+            <button
+              class="show-password"
+              type="button"
+              id="togglePassword"
+              aria-label="Show password"
+              aria-pressed="false"
+            >
+              Show
+            </button>
+
+          </div>
+        </div>
+
+        <!-- REMEMBER EMAIL -->
+
+        <label class="remember-row">
+          <input
+            type="checkbox"
+            id="rememberEmail"
+          >
+          Remember Email
+        </label>
+
+        <!-- LOGIN BUTTON -->
+
+        <button
+          id="loginButton"
+          class="login-button"
+          type="submit"
+        >
+          Log In
+        </button>
+
+      </form>
+
+      <p class="login-note">
+        Authorized BUILDORA personnel only.<br>
+        Sign in using your assigned system account.
+      </p>
+
+    </div>
+
+  </section>
+
+</div>
+
+<!-- =====================================
+     EXISTING BACKEND LOGIN INTEGRATION
+     POST /login -> JSON -> REDIRECT
+===================================== -->
+
+<script>
+  (() => {
+    "use strict";
+
+    const form =
+      document.getElementById("loginForm");
+
+    const emailInput =
+      document.getElementById("email");
+
+    const passwordInput =
+      document.getElementById("password");
+
+    const rememberEmail =
+      document.getElementById("rememberEmail");
+
+    const togglePassword =
+      document.getElementById("togglePassword");
+
+    const loginButton =
+      document.getElementById("loginButton");
+
+    const loginError =
+      document.getElementById("loginError");
+
+    let submitting = false;
+
+    // REMEMBER EMAIL ONLY
+    // Never store passwords.
+
+    try {
+      const saved = localStorage.getItem(
+        "buildora_remember_email"
+      );
+
+      if (saved) {
+        emailInput.value = saved;
+        rememberEmail.checked = true;
+      }
+    } catch (error) {
+      // Storage may be unavailable.
+    }
+
+    rememberEmail.addEventListener("change", () => {
+      if (!rememberEmail.checked) {
+        try {
+          localStorage.removeItem(
+            "buildora_remember_email"
+          );
+        } catch (error) {}
+      }
+    });
+
+    // SHOW / HIDE PASSWORD
+
+    togglePassword.addEventListener("click", () => {
+      const visible =
+        passwordInput.type === "text";
+
+      passwordInput.type =
+        visible ? "password" : "text";
+
+      togglePassword.textContent =
+        visible ? "Show" : "Hide";
+
+      togglePassword.setAttribute(
+        "aria-label",
+        visible ? "Show password" : "Hide password"
+      );
+
+      togglePassword.setAttribute(
+        "aria-pressed",
+        String(!visible)
+      );
+    });
+
+    // ERROR MESSAGE
+
+    function showError(message) {
+      loginError.textContent = message;
+      loginError.classList.add("visible");
+    }
+
+    function clearError() {
+      loginError.textContent = "";
+      loginError.classList.remove("visible");
+    }
+
+    // LOGIN
+    // Uses the EXISTING BUILDORA authentication endpoint.
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+
+      if (submitting) return;
+
+      clearError();
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        showError(
+          "Please enter your email and password."
+        );
+        return;
+      }
+
+      submitting = true;
+      loginButton.disabled = true;
+      loginButton.textContent = "Signing in...";
+
+      try {
+        const response = await fetch("/login", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            email,
+            password
+          })
+        });
+
+        const contentType =
+          response.headers.get("content-type") || "";
+
+        if (!contentType.includes("application/json")) {
+          throw new Error(
+            "Unexpected login response. Check the server."
+          );
+        }
+
+        const result = await response.json();
+
+        if (!response.ok || result.success !== true) {
+          throw new Error(
+            result.message ||
+            "Invalid email or password."
+          );
+        }
+
+        // Remember email only after successful login.
+
+        try {
+          if (rememberEmail.checked) {
+            localStorage.setItem(
+              "buildora_remember_email",
+              email
+            );
+          } else {
+            localStorage.removeItem(
+              "buildora_remember_email"
+            );
+          }
+        } catch (error) {}
+
+        // Redirect based on the role determined
+        // by the existing backend.
+
+        const redirect = result.redirect;
+
+        const allowedPaths = [
+          "/productivity/manager",
+          "/productivity/supervisor",
+          "/productivity/worker"
+        ];
+
+        if (
+          typeof redirect !== "string" ||
+          !allowedPaths.includes(redirect)
+        ) {
+          throw new Error(
+            "Login succeeded, but the dashboard " +
+            "redirect is missing or invalid."
+          );
+        }
+
+        window.location.assign(redirect);
+
+      } catch (error) {
+        showError(
+          error.message ||
+          "Unable to sign in. Please try again."
+        );
+
+        submitting = false;
+        loginButton.disabled = false;
+        loginButton.textContent = "Log In";
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>

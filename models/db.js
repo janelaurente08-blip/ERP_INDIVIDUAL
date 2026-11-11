@@ -1,38 +1,106 @@
 
-      /*
+/*
     MIT License
 
     Copyright (c) 2025 Christian I. Cabrera || XianFire Framework
     Mindoro State University - Philippines
 
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this software and associated documentation files
+    (the "Software"), to deal in the Software without restriction,
+    including without limitation the rights to use, copy, modify,
+    merge, publish, distribute, sublicense, and/or sell copies
+    of the Software.
 
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+    OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+    NONINFRINGEMENT.
+*/
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE.
-    */
+import "dotenv/config";
+import { Sequelize } from "sequelize";
 
-    import { Sequelize } from "sequelize";
+// ======================================
+// BUILDORA PRODUCTIVITY - SHARED DATABASE
+// ======================================
 
-    export const sequelize = new Sequelize(
-      "labor_productivity_management",
-      "root",
-      "",
-      {
-        host: "localhost",
-        dialect: "mysql",
-        logging: false
-      }
-    );
+const DB_HOST = process.env.DB_HOST;
+
+const DB_PORT = Number(
+  process.env.DB_PORT || 3306
+);
+
+const DB_NAME =
+  process.env.DB_DATABASE || process.env.DB_NAME;
+
+const DB_USER =
+  process.env.DB_USER || process.env.DB_USERNAME;
+
+const DB_PASSWORD = process.env.DB_PASSWORD;
+
+// ======================================
+// DATABASE VALIDATION
+// ======================================
+
+if (
+  !DB_HOST ||
+  !DB_NAME ||
+  !DB_USER ||
+  !DB_PASSWORD ||
+  !Number.isInteger(DB_PORT) ||
+  DB_PORT < 1 ||
+  DB_PORT > 65535
+) {
+  throw new Error(
+    "Invalid Productivity database configuration. " +
+    "Check your .env file."
+  );
+}
+
+// ======================================
+// SEQUELIZE CONNECTION
+// ======================================
+
+export const sequelize = new Sequelize(
+  DB_NAME,
+  DB_USER,
+  DB_PASSWORD,
+  {
+    host: DB_HOST,
+    port: DB_PORT,
+    dialect: "mysql",
+    logging: false,
+
+    define: {
+      timestamps: false,
+      freezeTableName: true
+    },
+
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    },
+
+    dialectOptions: {
+      connectTimeout: 10000
+    }
+  }
+);
+
+// ======================================
+// DATABASE CONNECTION TEST
+// ======================================
+
+export const testDatabase = async () => {
+  await sequelize.authenticate();
+
+  console.log("✅ BUILDORA PRODUCTIVITY MYSQL CONNECTED");
+  console.log("Database:", DB_NAME);
+  console.log("Host:", DB_HOST);
+  console.log("User:", DB_USER);
+};
+
+export default sequelize;

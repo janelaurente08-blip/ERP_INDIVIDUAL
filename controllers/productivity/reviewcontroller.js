@@ -22,11 +22,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
     */
-import { Labor, sequelize } from "../models/Labor.js";
-await sequelize.sync();
-const laborcontroller ={
-  index: async (req, res) => {
-    res.send("Index Page");
-  },
-};
-export { laborcontroller };
+
+export {
+  createReview
+} from "./productivitycontroller.js";

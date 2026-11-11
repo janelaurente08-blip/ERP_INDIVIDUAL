@@ -1,5 +1,5 @@
 {
-  "name": "labor-productivity-management",
+  "name": "buildora-productivity",
   "version": "1.0.0",
   "description": "XianFire Framework project",
   "main": "index.js",
@@ -21,10 +21,13 @@
   },
   "dependencies": {
     "bcrypt": "^5.1.0",
+    "bcryptjs": "^3.0.3",
     "connect-flash": "^0.1.1",
+    "dotenv": "^18.0.10",
     "express": "^4.22.3",
-    "express-session": "^1.17.3",
-    "hbs": "^4.4.0",
+    "express-handlebars": "^9.0.4",
+    "express-session": "^1.19.0",
+    "hbs": "^4.2.0",
     "inquirer": "^9.2.15",
     "multer": "^2.0.2",
     "mysql2": "^3.24.6",

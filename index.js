@@ -1,6 +1,6 @@
 /*
     MIT License
-
+    
     Copyright (c) 2025 Christian I. Cabrera || XianFire Framework
     Mindoro State University - Philippines
 
@@ -22,148 +22,86 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
     */
+    
 
-    import express from "express";
-    import path from "path";
-    import session from "express-session";
-    import flash from "connect-flash";
-    import router from "./routes/index.js";
-    import fs from "fs";
-    import hbs from "hbs";
-    import { fileURLToPath, pathToFileURL } from "url";
-    import { dirname } from "path";
-    import sequelize from "./config/database.js";
-import Worker from "./models/Worker.js";
+import express from "express";
+import session from "express-session";
+import { engine } from "express-handlebars";
+import path from "node:path";
 
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
+import { config } from "./config/env.js";
+import { testDatabase } from "./models/db.js";
+import routes from "./routes/index.js";
 
-    const app = express();
+const app = express();
 
-    // Use port 3001 to avoid the existing port 3000 conflict.
-    const PORT = process.env.PORT || 3001;
+app.disable("x-powered-by");
 
-    // Middleware
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-    app.use(express.static(path.join(__dirname, "public")));
+app.use("/public", express.static(
+  path.resolve("public")
+));
 
-    // Session configuration
-    app.use(
-      session({
-        secret: process.env.SESSION_SECRET || "xianfire-secret-key",
-        resave: false,
-        saveUninitialized: false,
-      })
+app.engine("xian", engine({
+  extname: ".xian",
+  defaultLayout: false
+}));
+
+app.set("view engine", "xian");
+app.set("views", path.resolve("views"));
+
+if (!config.sessionSecret) {
+  throw new Error("SESSION_SECRET is missing from .env");
+}
+
+if (config.isProduction) {
+  app.set("trust proxy", 1);
+}
+
+app.use(session({
+  name: "buildora.sid",
+  secret: config.sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: config.isProduction,
+    maxAge: 1000 * 60 * 60 * 8
+  }
+}));
+
+app.use(routes);
+
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found."
+  });
+});
+
+app.use((err, req, res, next) => {
+  console.error("[BUILDORA]", err);
+
+  res.status(500).json({
+    success: false,
+    message: config.isProduction
+      ? "Internal server error."
+      : err.message
+  });
+});
+
+try {
+  await testDatabase();
+
+  app.listen(config.port, () => {
+    console.log(
+      `🔥 XianFire running at http://localhost:${config.port}`
     );
-
-    app.use(flash());
-
-    // XianFire template engine
-    app.engine("xian", async (filePath, options, callback) => {
-      try {
-        const originalPartialsDir = hbs.partialsDir;
-
-        hbs.partialsDir = path.join(__dirname, "views");
-
-        const result = await new Promise((resolve, reject) => {
-          hbs.__express(filePath, options, (err, html) => {
-            if (err) {
-              return reject(err);
-            }
-
-            resolve(html);
-          });
-        });
-
-        hbs.partialsDir = originalPartialsDir;
-
-        callback(null, result);
-      } catch (err) {
-        callback(err);
-      }
-    });
-
-    // Flash messages
-    app.use((req, res, next) => {
-      res.locals.success_msg = req.flash("success_msg");
-      res.locals.error_msg = req.flash("error_msg");
-
-      next();
-    });
-
-    // View configuration
-    app.set("views", path.join(__dirname, "views"));
-    app.set("view engine", "xian");
-
-    // Register XianFire partials
-    const partialsDir = path.join(__dirname, "views", "partials");
-
-    if (fs.existsSync(partialsDir)) {
-      fs.readdir(partialsDir, (err, files) => {
-        if (err) {
-          console.error("Could not read partials directory:", err);
-          return;
-        }
-
-        files
-          .filter((file) => file.endsWith(".xian"))
-          .forEach((file) => {
-            const partialName = file.replace(".xian", "");
-            const fullPath = path.join(partialsDir, file);
-
-            fs.readFile(fullPath, "utf8", (err, content) => {
-              if (err) {
-                console.error(`Failed to read partial: ${file}`, err);
-                return;
-              }
-
-              hbs.registerPartial(partialName, content);
-            });
-          });
-      });
-    }
-
-    // Routes
-    app.use("/", router);
-
-    // Export app for other modules
-    export default app;
-
-    // Start server
-    // Start server
-  export const startServer = async (port = PORT) => {
-    await sequelize.sync();
-
-    return new Promise((resolve, reject) => {
-      const server = app.listen(port, () => {
-        console.log(
-          `🔥 XianFire server is running on http://localhost:${port}`
-        );
-
-        resolve(server);
-      });
-
-      server.on("error", reject);
-    });
-  };
-
-    // Automatically start only when executed directly.
-    const isDirectRun =
-      process.argv[1] &&
-      import.meta.url === pathToFileURL(process.argv[1]).href;
-
-    if (isDirectRun && !process.env.XIAN_ELECTRON) {
-      startServer().catch((error) => {
-        if (error.code === "EADDRINUSE") {
-          console.error(
-            `Port ${PORT} is already in use. Stop the other server or change PORT.`
-          );
-        } else {
-          console.error("Failed to start XianFire:", error);
-        }
-
-        process.exitCode = 1;
-      });
-    }
+  });
+} catch (error) {
+  console.error("Database connection failed:", error.message);
+  process.exit(1);
+}

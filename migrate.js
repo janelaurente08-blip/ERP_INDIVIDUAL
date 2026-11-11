@@ -1,32 +1,15 @@
 
-import { Sequelize } from "sequelize";
-import { sequelize } from "./models/db.js";
-import { User } from "./models/userModel.js";
-import inquirer from "inquirer";
-
-const rootSequelize = new Sequelize("mysql://root:@localhost:3306/");
-
-const { createDb } = await inquirer.prompt([
-  {
-    type: "confirm",
-    name: "createDb",
-    message: "Database 'labor-productivity-management' may not exist. Create it?",
-    default: true,
-  },
-]);
-
-if (createDb) {
-  await rootSequelize.query("CREATE DATABASE IF NOT EXISTS labor-productivity-management;");
-  console.log("✅ Database created (if it did not exist)");
-}
+import { testDatabase, sequelize } from "./models/db.js";
 
 try {
-  await sequelize.authenticate();
-  console.log("✅ Connected to MySQL database!");
-  await sequelize.sync({ force: true });
-  console.log("✅ Tables created for all models!");
-} catch (err) {
-  console.error("❌ Migration failed:", err);
-} finally {
-  process.exit();
+  await testDatabase();
+
+  console.log(
+    "Existing BUILDORA database detected. No migration executed."
+  );
+
+  await sequelize.close();
+} catch (error) {
+  console.error("Database verification failed:", error.message);
+  process.exitCode = 1;
 }

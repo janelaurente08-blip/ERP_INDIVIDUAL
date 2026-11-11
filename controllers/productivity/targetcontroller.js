@@ -1,6 +1,6 @@
 /*
     MIT License
-
+    
     Copyright (c) 2025 Christian I. Cabrera || XianFire Framework
     Mindoro State University - Philippines
 
@@ -22,32 +22,8 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
     */
-  // Firebase doesn't require predefined models.
-  // Use Firestore directly in controllers or create helper functions here.
-  // Collection name: "attendance"
 
-  import { DataTypes } from 'sequelize';
-  import sequelize from '../config/database.js';
-
-  const Attendance = sequelize.define('Attendance', {
-      date: {
-          type: DataTypes.DATEONLY,
-          allowNull: false
-      },
-      clockIn: {
-          type: DataTypes.DATE
-      },
-      clockOut: {
-          type: DataTypes.DATE
-      },
-      totalHours: {
-          type: DataTypes.FLOAT,
-          defaultValue: 0
-      },
-      workerId: {
-          type: DataTypes.INTEGER,
-          allowNull: false
-      }
-  });
-
-  export default Attendance;
+export {
+  createTarget,
+  updateTarget
+} from "./productivitycontroller.js";

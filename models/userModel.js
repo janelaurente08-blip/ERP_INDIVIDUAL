@@ -23,13 +23,34 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
     */
+
 import { DataTypes } from "sequelize";
 import { sequelize } from "./db.js";
 
-export const User = sequelize.define("User", {
-  name: { type: DataTypes.STRING, allowNull: false },
-  email: { type: DataTypes.STRING, allowNull: false },
-  password: { type: DataTypes.STRING, allowNull: false },
+export const User = sequelize.define("users", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
   role: { type: DataTypes.ENUM("admin", "staff", "visitors"), allowNull: false, defaultValue: "visitors" }
+}, {
+  tableName: "users",
+  timestamps: true,
+  createdAt: "createdAt",
+  updatedAt: "updatedAt"
 });
-export { sequelize }; 
+ 

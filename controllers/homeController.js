@@ -1,7 +1,7 @@
 
     /*
     MIT License
-
+    
     Copyright (c) 2025 Christian I. Cabrera || XianFire Framework
     Mindoro State University - Philippines
 
@@ -23,19 +23,26 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
     */
+ 
+import { ROLES } from "../middleware/role.js";
 
-    import Worker from "../models/Worker.js";
+export function homePage(req, res) {
+  const roles = req.user.roles;
 
-    export const homePage = async (req, res) => {
-      try {
-        const totalWorkers = await Worker.count();
+  if (roles.includes(ROLES.MANAGER)) {
+    return res.redirect("/productivity/manager");
+  }
 
-        res.render("home", {
-          title: "Labor Productivity Management",
-          totalWorkers,
-        });
-      } catch (error) {
-        console.error(error);
-        res.status(500).send("Could not load dashboard.");
-      }
-    };
+  if (roles.includes(ROLES.SUPERVISOR)) {
+    return res.redirect("/productivity/supervisor");
+  }
+
+  if (roles.includes(ROLES.WORKER)) {
+    return res.redirect("/productivity/worker");
+  }
+
+  return res.status(403).send(
+    "Your account has no Productivity role assigned."
+  );
+}
+

@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Site Supervisor | BUILDORA</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="/productivity/dashboard.css">
+</head>
+
+<body data-role="supervisor">
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <i class="brand-mark"></i>
+      BUILDORA
+    </div>
+
+    <div class="brand-sub">
+      Labor Productivity Management
+    </div>
+
+    <div class="role-name">
+      Site Supervisor
+    </div>
+
+    <nav aria-label="Dashboard navigation">
+      <a href="#overview" class="nav-link active">Overview</a>
+      <a href="#projects" class="nav-link">Assigned Projects</a>
+      <a href="#tasks" class="nav-link">Assigned Tasks</a>
+      <a href="#accomplishments" class="nav-link">Verify Accomplishments</a>
+      <a href="#history" class="nav-link">Verification History</a>
+      <a href="#progress" class="nav-link">Site Productivity</a>
+    </nav>
+  </aside>
+
+  <div class="main-area">
+
+    <header class="topbar">
+      <div>
+        <div class="top-title">Site Supervisor</div>
+        <div class="top-sub">
+          Task monitoring and work verification
+        </div>
+      </div>
+
+      <button id="logout" type="button" class="logout">
+        Logout
+      </button>
+    </header>
+
+    <main id="app" class="content" aria-live="polite"></main>
+
+  </div>
+</div>
+
+<script src="/productivity/ui.js" defer></script>
+
+</body>
+</html>

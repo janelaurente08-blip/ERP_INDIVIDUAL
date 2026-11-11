@@ -22,33 +22,55 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
     */
-  // Firebase doesn't require predefined models.
-  // Use Firestore directly in controllers or create helper functions here.
-  // Collection name: "worker"
 
-  import { DataTypes } from 'sequelize';
-  import sequelize from '../config/database.js';
 
-  const Worker = sequelize.define('Worker', {
-      name: {
-          type: DataTypes.STRING,
-          allowNull: false
-      },
-      position: {
-          type: DataTypes.STRING,
-          allowNull: false
-      },
-      department: {
-          type: DataTypes.STRING,
-          allowNull: false
-      },
-      contact: {
-          type: DataTypes.STRING
-      },
-      status: {
-          type: DataTypes.ENUM('Active', 'Inactive'),
-          defaultValue: 'Active'
+import { QueryTypes } from "sequelize";
+import { sequelize } from "../models/db.js";
+
+export async function requireAuth(req, res, next) {
+  try {
+    if (!req.session?.userId) {
+      if (req.originalUrl.startsWith("/api/")) {
+        return res.status(401).json({
+          success: false,
+          message: "Please log in."
+        });
       }
-  });
+      return res.redirect("/login");
+    }
 
-  export default Worker;
+    const users = await sequelize.query(`
+      SELECT id, name, email
+      FROM users
+      WHERE id = ?
+      LIMIT 1
+    `, {
+      replacements: [req.session.userId],
+      type: QueryTypes.SELECT
+    });
+
+    if (!users.length) {
+      req.session.destroy(() => {});
+      return res.status(401).send("Session expired.");
+    }
+
+    const roles = await sequelize.query(`
+      SELECT r.role_name
+      FROM user_roles ur
+      JOIN roles r ON r.id = ur.role_id
+      WHERE ur.user_id = ?
+    `, {
+      replacements: [req.session.userId],
+      type: QueryTypes.SELECT
+    });
+
+    req.user = {
+      ...users[0],
+      roles: roles.map(r => r.role_name)
+    };
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+}

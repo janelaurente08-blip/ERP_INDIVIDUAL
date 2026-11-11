@@ -1,6 +1,6 @@
 /*
     MIT License
-
+    
     Copyright (c) 2025 Christian I. Cabrera || XianFire Framework
     Mindoro State University - Philippines
 
@@ -24,31 +24,49 @@
     */
   // Firebase doesn't require predefined models.
   // Use Firestore directly in controllers or create helper functions here.
-  // Collection name: "task"
+  // Collection name: "productivityreview"
 
-  import { DataTypes } from "sequelize";
-import sequelize from "../config/database.js";
+ 
+import { DataTypes } from "sequelize";
+import { sequelize } from "../db.js";
 
-const Task = sequelize.define("Task", {
-  title: {
-    type: DataTypes.STRING,
-    allowNull: false,
+export const ProductivityReview = sequelize.define(
+  "ProductivityReview",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    worker_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    reviewed_by: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    review_start_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: false
+    },
+    review_end_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: false
+    },
+    productivity_score: DataTypes.DECIMAL(5, 2),
+    performance_rating: DataTypes.ENUM(
+      "Excellent",
+      "Good",
+      "Average",
+      "Needs Improvement"
+    ),
+    comments: DataTypes.TEXT
   },
-  description: {
-    type: DataTypes.TEXT,
-  },
-  assignedWorkerId: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  dueDate: {
-    type: DataTypes.DATEONLY,
-    allowNull: true,
-  },
-  status: {
-    type: DataTypes.ENUM("Pending", "In Progress", "Completed"),
-    defaultValue: "Pending",
-  },
-});
-
-export default Task;
+  {
+    tableName: "productivity_reviews",
+    timestamps: true,
+    createdAt: "created_at",
+    updatedAt: "updated_at"
+  }
+);

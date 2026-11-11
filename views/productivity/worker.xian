@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Worker | BUILDORA</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="/productivity/dashboard.css">
+</head>
+
+<body data-role="worker">
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <i class="brand-mark"></i>
+      BUILDORA
+    </div>
+
+    <div class="brand-sub">
+      Labor Productivity Management
+    </div>
+
+    <div class="role-name">
+      Worker
+    </div>
+
+    <nav aria-label="Dashboard navigation">
+      <a href="#overview" class="nav-link active">My Dashboard</a>
+      <a href="#profile" class="nav-link">My Profile</a>
+      <a href="#tasks" class="nav-link">Assigned Tasks</a>
+      <a href="#targets" class="nav-link">Productivity Targets</a>
+      <a href="#submit" class="nav-link">Submit Accomplishment</a>
+      <a href="#history" class="nav-link">Work History</a>
+      <a href="#results" class="nav-link">Productivity Results</a>
+      <a href="#reviews" class="nav-link">Performance Reviews</a>
+    </nav>
+  </aside>
+
+  <div class="main-area">
+
+    <header class="topbar">
+      <div>
+        <div class="top-title">Worker Dashboard</div>
+        <div class="top-sub">
+          Assigned tasks and completed work
+        </div>
+      </div>
+
+      <button id="logout" type="button" class="logout">
+        Logout
+      </button>
+    </header>
+
+    <main id="app" class="content" aria-live="polite"></main>
+
+  </div>
+</div>
+
+<script src="/productivity/ui.js" defer></script>
+
+</body>
+</html>
